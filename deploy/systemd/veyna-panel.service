@@ -1,0 +1,60 @@
+[Unit]
+Description=Veyna Panel Backend Service
+Documentation=https://github.com/cerbenum/Veyna.Panel
+After=network-online.target postgresql.service
+Wants=network-online.target
+ConditionPathExists=/opt/veyna-panel/bin/veyna-panel
+ConditionPathExists=/etc/veyna-panel/config.env
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+User=veyna-panel
+Group=veyna-panel
+WorkingDirectory=/opt/veyna-panel
+ExecStart=/opt/veyna-panel/bin/veyna-panel
+ExecReload=/bin/kill -HUP $MAINPID
+EnvironmentFile=-/etc/veyna-panel/config.env
+
+# Restart policy
+Restart=on-failure
+RestartSec=5
+
+# Timeouts
+TimeoutStartSec=30
+TimeoutStopSec=30
+
+# Hardening
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=yes
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+RestrictNamespaces=yes
+RestrictRealtime=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallFilter=@system-service
+SystemCallArchitectures=native
+ReadWritePaths=/opt/veyna-panel/data /var/log/veyna-panel /var/backups/veyna-panel
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=veyna-panel
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
